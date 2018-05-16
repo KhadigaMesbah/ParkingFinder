@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<?xml-stylesheet type='text/xsl' href='image_metadata_stylesheet.xsl'?>
+<dataset>
+<name>imglab dataset</name>
+<comment>Created by imglab tool.</comment>
+<images>
+  <image file='C:\\xampp\htdocs\SAM_3290.JPG'>
+    <box top='755' left='195' width='451' height='556'/>
+    <box top='755' left='675' width='301' height='576'/>
+    <box top='835' left='1030' width='376' height='561'/>
+    <box top='760' left='1445' width='351' height='626'/>
+    <box top='810' left='1970' width='416' height='606'/>
+    <box top='700' left='2370' width='421' height='721'/>
+    <box top='890' left='2805' width='326' height='536'/>
+    <box top='750' left='3140' width='471' height='616'/>
+    <box top='1505' left='120' width='296' height='501'/>
+    <box top='1500' left='525' width='291' height='506'/>
+    <box top='1505' left='895' width='341' height='491'/>
+    <box top='200' left='2560' width='406' height='466'/>
+  </image>
+</images>
+</dataset>
