@@ -6,7 +6,6 @@ cgitb.enable()
 print("Content-Type: text/html;charset=utf-8")
 print()
 
-#import pymysql
 from keras.preprocessing.image import img_to_array
 from keras.models import load_model
 import cv2
@@ -29,6 +28,8 @@ import imutils
 #	help="path to save cropped image")
 #args = vars(ap.parse_args())
 
+
+#Make sure to check the path in the XML as well..
 print("PARSING XML")
 tree = ET.parse('C:\\xampp\\htdocs\\real-parking.xml')
 root = tree.getroot()
@@ -72,7 +73,7 @@ def main():
             save_filename = r'C:\\xampp\\htdocs\\segmented-real\\' + parking_lot_tag
         #print(save_filename)
             cv2.imwrite(save_filename, cropped_img)
-            parking_lot_index = parking_lot_index + 1
+            #parking_lot_index = parking_lot_index + 1
 		
 		
         #print('Classifying Image..')
@@ -101,13 +102,14 @@ def main():
 		
         #print(output)
 		
-            parking_dict[parking_lot_tag.replace('.jpg','')]  = 1 if label == "Occupied" else 0
+            parking_dict[parking_lot_index]  = 1 if label == "Occupied" else 0
+            parking_lot_index = parking_lot_index + 1
         #print(parking_dict)
 		
 #print(parking_dict)
 #parking_dict = sorted(parking_dict)		
     
- 
+    sorted(parking_dict)
     conn = pymysql.connect(host='localhost',port=3307, user='root', password='', db='parking_test') 
     a = conn.cursor()
 
@@ -126,9 +128,9 @@ def main():
     if(flag):
     
         for i in parking_dict.items():   
-            keys = i[0]
+            keys = 'Space' + str(i[0])
             values = i[1]
-            id = int(keys[5:])
+            id = i[0]
         #print(id)
             sql = """INSERT INTO parking_state (Space, State, ID) VALUES (%s, %s, %s)"""
         #sql = """UPDATE parking_state SET Space = %s, State = %s WHERE ID = %s """
@@ -139,12 +141,12 @@ def main():
             print ("%s: %s" % (key, parking_dict[key]))
 
         for i in parking_dict.items():   
-            keys = i[0]
+            keys = 'Space' + str(i[0])
             values = i[1]
-            id = int(keys[5:])
+            id = i[0]
         #sql = """INSERT INTO parking_state (Space, State, ID) VALUES (%s, %s, %s)"""
-            sql = """UPDATE parking_state SET Space = %s, State = %s WHERE ID = %s """
-            a.execute(sql, (keys, values, int(id)))
+            sql = """UPDATE parking_state SET State = %s WHERE ID = %s """
+            a.execute(sql, (values, int(id)))
             flag = False
 		 
     conn.commit()

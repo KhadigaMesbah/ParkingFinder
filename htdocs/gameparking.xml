@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<?xml-stylesheet type='text/xsl' href='image_metadata_stylesheet.xsl'?>
+<dataset>
+<name>imglab dataset</name>
+<comment>Created by imglab tool.</comment>
+<images>
+  <image file='C:\\xampp\htdocs\game-parking.jpg'>
+    <box top='45' left='231' width='130' height='203'/>
+    <box top='37' left='359' width='130' height='203'/>
+    <box top='29' left='485' width='130' height='203'/>
+    <box top='26' left='631' width='130' height='203'/>
+    <box top='23' left='759' width='130' height='203'/>
+    <box top='25' left='893' width='130' height='203'/>
+    <box top='28' left='1019' width='130' height='203'/>
+    <box top='30' left='1153' width='65' height='203'/>
+    
+  </image>
+</images>
+</dataset>

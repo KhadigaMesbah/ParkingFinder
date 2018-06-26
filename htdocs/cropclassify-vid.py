@@ -31,7 +31,7 @@ import imutils
 parking_dict = {}
 
 print("PARSING XML")
-tree = ET.parse('C:\\xampp\\htdocs\\video.xml')
+tree = ET.parse('C:\\xampp\\htdocs\\gameparking.xml')
 root = tree.getroot()
 
 print("[INFO] loading network...")
@@ -42,51 +42,53 @@ print("CAPTURING IMAGE..")
 #    print("CURRENT IMAGE" , image.attrib['file'])
 #    image_name = image.attrib['file']
 #    orig_img = cv2.imread(image_name)
-cap = cv2.VideoCapture('C:\\xampp\\htdocs\\SAM_3303.AVI')
-while(cap.isOpened()):
-    ret, frame = cap.read()
-    frame = cv2.resize(frame, (900, 700))
-    #cv2.imshow('Original Image', frame)
-    #cv2.waitKey(0)
-    parking_lot_index = 1
+def main():
+    cap = cv2.VideoCapture('C:\\xampp\\htdocs\\SAM_3317.AVI')
+    while(cap.isOpened()):
+        ret, frame = cap.read()
+        if(ret == True):
+        #frame = cv2.resize(frame, (900, 700))
+        #cv2.imshow('Original Image', frame)
+        #cv2.waitKey(0)
+            parking_lot_index = 1
 	
     #Iterates over all bounding boxes found in each image
-    for box in root.iter('box'):
-        height = box.attrib['height']
-        width = box.attrib['width']
-        top = box.attrib['top']
-        left = box.attrib['left']
+            for box in root.iter('box'):
+                height = box.attrib['height']
+                width = box.attrib['width']
+                top = box.attrib['top']
+                left = box.attrib['left']
 		
-        startX = int(left)
-        endX = int(left) + int(width)
-        startY = int(top)
-        endY = int(top) + int(height)
+                startX = int(left)
+                endX = int(left) + int(width)
+                startY = int(top)
+                endY = int(top) + int(height)
 		
 		#Crops the image according to calculated parameters
         #print('Cropping Image..')
-        cropped_img = frame[startY : endY, startX : endX]
-        parking_lot_tag = 'Space' + str(parking_lot_index) + '.jpg'
-        #cv2.imshow(parking_lot_tag, cropped_img)
-        #cv2.waitKey(0)
+                cropped_img = frame[startY : endY, startX : endX]
+                parking_lot_tag = 'Space' + str(parking_lot_index) + '.jpg'
+            #cv2.imshow(parking_lot_tag, cropped_img)
+            #cv2.waitKey(0)
         
 		#Saves image to file
         #print('Saving Image')
-        save_filename = r'C:\\xampp\\htdocs\\segmented-real\\' + parking_lot_tag
+                save_filename = r'C:\\xampp\\htdocs\\segmented-real\\' + parking_lot_tag
         #print(save_filename)
-        cv2.imwrite(save_filename, cropped_img)
-        parking_lot_index = parking_lot_index + 1
+                cv2.imwrite(save_filename, cropped_img)
+                #parking_lot_index = parking_lot_index + 1
 		
 		
         #print('Classifying Image..')
-        image = cv2.imread(save_filename)
-        orig = image.copy()
+                image = cv2.imread(save_filename)
+                orig = image.copy()
 		
-        image = cv2.resize(cropped_img, (28, 28))
-        image = image.astype("float") / 255.0
-        image = img_to_array(image)
-        image = np.expand_dims(image, axis=0)
+                image = cv2.resize(cropped_img, (28, 28))
+                image = image.astype("float") / 255.0
+                image = img_to_array(image)
+                image = np.expand_dims(image, axis=0)
         
-        (Empty, Occupied) = model.predict(image)[0]
+                (Empty, Occupied) = model.predict(image)[0]
 		
 		#Work on whole frame
         #if(Occupied > Empty):
@@ -99,7 +101,7 @@ while(cap.isOpened()):
         #    break
 		
 		# build the label
-        label = "Occupied" if Occupied > Empty else "Empty"
+                label = "Occupied" if Occupied > Empty else "Empty"
         #proba = Occupied if Occupied > Empty else Empty
         #output = " {} : {} , {:.2f}%".format(parking_lot_tag, label, proba * 100)
 		
@@ -113,51 +115,56 @@ while(cap.isOpened()):
 		
         #print(output)
 		
-        parking_dict[parking_lot_tag.replace('.jpg','')]  = 1 if label == "Occupied" else 0
-        print(parking_dict)
-		
-    conn = pymysql.connect(host='localhost',port=3307, user='root', password='', db='parking_test') 
-    a = conn.cursor()
+                parking_dict[parking_lot_index]  = 1 if label == "Occupied" else 0
+                parking_lot_index = parking_lot_index + 1
+				#print(parking_dict)
+			
+            sorted(parking_dict)
+            print(parking_dict)
+            conn = pymysql.connect(host='localhost',port=3307, user='root', password='', db='parking_test') 
+            a = conn.cursor()
     
-    sql = """SELECT COUNT(*) FROM parking_state"""
-    a.execute(sql)
-    (result,)= a.fetchone()
-    print("RESULT!!")
-    print(result)
-    if(result == 0 ):
-        flag = True
-    else:
-        flag = False
+            sql = """SELECT COUNT(*) FROM parking_state"""
+            a.execute(sql)
+            (result,)= a.fetchone()
+            print("RESULT!!")
+            print(result)
+            if(result == 0 ):
+                flag = True
+            else:
+                flag = False
 	
 	#flag = True	
-    if(flag):
-        for i in parking_dict.items():   
-            keys = i[0]
-            values = i[1]
-            id = int(keys[5:])
+            if(flag):
+                for i in parking_dict.items():   
+                    keys = 'Space' + str(i[0])
+                    values = i[1]
+                    id = i[0]
         #print(id)
-            sql = """INSERT INTO parking_state (Space, State, ID) VALUES (%s, %s, %s)"""
+                    sql = """INSERT INTO parking_state (Space, State, ID) VALUES (%s, %s, %s)"""
         #sql = """UPDATE parking_state SET Space = %s, State = %s WHERE ID = %s """
-            a.execute(sql, (keys, values, int(id)))
-            flag = False
-    else:
-        for key in sorted(parking_dict):
-            print ("%s: %s" % (key, parking_dict[key]))
+                    a.execute(sql, (keys, values, int(id)))
+                    flag = False
+            else:
+                #for key in sorted(parking_dict):
+                #    print ("%s: %s" % (key, parking_dict[key]))
 
-        for i in parking_dict.items():   
-            keys = i[0]
-            values = i[1]
-            id = int(keys[5:])
+                for i in parking_dict.items():   
+                    keys = 'Space' + str(i[0])
+                    values = i[1]
+                    id = i[0]
         #sql = """INSERT INTO parking_state (Space, State, ID) VALUES (%s, %s, %s)"""
-            sql = """UPDATE parking_state SET Space = %s, State = %s WHERE ID = %s """
-            a.execute(sql, (keys, values, int(id)))
-            flag = False
+                    sql = """UPDATE parking_state SET Space = %s, State = %s WHERE ID = %s """
+                    a.execute(sql, (keys, values, int(id)))
+                    flag = False
 		 
-    conn.commit()
-    conn.close()
+            conn.commit()
+            conn.close()
 	
-    print(time.ctime())
-    #threading.Timer(3).start()
-
+            print(time.ctime())
+            #threading.Timer(10,main).start()
+        else:
+            cap.release()
+main()
 #To sort the dictionary according to key values..
 #print(sorted(parking_dict))
